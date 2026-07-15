@@ -18,7 +18,7 @@
 					"source": {
 						"type": "DelimitedTextSource",
 						"storeSettings": {
-							"type": "AzureBlobFSReadSettings",
+							"type": "AzureBlobStorageReadSettings",
 							"recursive": true,
 							"enablePartitionDiscovery": false
 						},
@@ -49,7 +49,7 @@
 				},
 				"inputs": [
 					{
-						"referenceName": "ds_raw_order_items",
+						"referenceName": "ds_landing_order_items",
 						"type": "DatasetReference"
 					}
 				],
