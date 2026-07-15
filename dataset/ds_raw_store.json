@@ -1,0 +1,19 @@
+{
+	"name": "ds_raw_store",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_dl_orders",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Json",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": "store.json",
+				"fileSystem": "raw"
+			}
+		},
+		"schema": {}
+	}
+}
