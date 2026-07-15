@@ -47,7 +47,7 @@
 				},
 				"inputs": [
 					{
-						"referenceName": "ds_order_parquet",
+						"referenceName": "ds_landing_order_parquet",
 						"type": "DatasetReference"
 					}
 				],
