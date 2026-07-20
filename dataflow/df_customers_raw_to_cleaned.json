@@ -18,7 +18,7 @@
 						"referenceName": "ds_cleaned_customer",
 						"type": "DatasetReference"
 					},
-					"name": "cleansedorders"
+					"name": "cleansedcustomers"
 				}
 			],
 			"transformations": [
@@ -51,7 +51,7 @@
 				"     preCommands: [],",
 				"     postCommands: [],",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> cleansedorders"
+				"     skipDuplicateMapOutputs: true) ~> cleansedcustomers"
 			]
 		}
 	}

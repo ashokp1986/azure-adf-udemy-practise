@@ -15,7 +15,7 @@
 			"sinks": [
 				{
 					"dataset": {
-						"referenceName": "ds_cleansed_stores",
+						"referenceName": "ds_cleansed_products",
 						"type": "DatasetReference"
 					},
 					"name": "cleansedorders"
@@ -41,9 +41,8 @@
 				"     documentForm: 'documentPerLine') ~> products",
 				"products derive(UPDATED_TIMESTAMP = currentTimestamp()) ~> derivedColumn1",
 				"derivedColumn1 cast(output(",
-				"          STORE_ID as integer,",
-				"          WEB_ADDRESS as double,",
-				"          LONGITUDE as double",
+				"          PRODUCT_ID as integer,",
+				"          UNIT_PRICE as double",
 				"     ),",
 				"     errors: true) ~> cast3",
 				"cast3 sink(allowSchemaDrift: true,",
