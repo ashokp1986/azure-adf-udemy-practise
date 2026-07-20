@@ -1,0 +1,60 @@
+{
+	"name": "df_products_raw_to_cleaned",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "ds_landing_products",
+						"type": "DatasetReference"
+					},
+					"name": "products"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "ds_cleansed_stores",
+						"type": "DatasetReference"
+					},
+					"name": "cleansedorders"
+				}
+			],
+			"transformations": [
+				{
+					"name": "derivedColumn1"
+				},
+				{
+					"name": "cast3"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          PRODUCT_ID as string,",
+				"          PRODUCT_NAME as string,",
+				"          UNIT_PRICE as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     documentForm: 'documentPerLine') ~> products",
+				"products derive(UPDATED_TIMESTAMP = currentTimestamp()) ~> derivedColumn1",
+				"derivedColumn1 cast(output(",
+				"          STORE_ID as integer,",
+				"          WEB_ADDRESS as double,",
+				"          LONGITUDE as double",
+				"     ),",
+				"     errors: true) ~> cast3",
+				"cast3 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'parquet',",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> cleansedorders"
+			]
+		}
+	}
+}
