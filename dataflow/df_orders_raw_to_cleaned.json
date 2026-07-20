@@ -15,7 +15,7 @@
 			"sinks": [
 				{
 					"dataset": {
-						"referenceName": "dl_order_cleansed",
+						"referenceName": "ds_cleansed_orders",
 						"type": "DatasetReference"
 					},
 					"name": "cleansedorders"
@@ -23,10 +23,10 @@
 			],
 			"transformations": [
 				{
-					"name": "cast1"
+					"name": "derivedColumn1"
 				},
 				{
-					"name": "derivedColumn1"
+					"name": "cast3"
 				}
 			],
 			"scriptLines": [
@@ -41,15 +41,15 @@
 				"     validateSchema: false,",
 				"     ignoreNoFilesFound: false,",
 				"     format: 'parquet') ~> orders",
-				"orders cast(output(",
+				"orders derive(ORDER_DATE = toDate(ORDER_DATETIME,'dd-MMM-yy HH.mm.ss.SS'),",
+				"          UPDATED_TIMESTAMP = currentTimestamp()) ~> derivedColumn1",
+				"derivedColumn1 cast(output(",
 				"          ORDER_ID as integer,",
 				"          CUSTOMER_ID as integer,",
 				"          STORE_ID as integer",
 				"     ),",
-				"     errors: true) ~> cast1",
-				"cast1 derive(ORDER_TIMESTAMP = toTimestamp(ORDER_DATETIME,'dd-MMM-yy HH:mm:ss.SS'),",
-				"          UPDATED_TIMESTAMP = currentTimestamp()) ~> derivedColumn1",
-				"derivedColumn1 sink(allowSchemaDrift: true,",
+				"     errors: true) ~> cast3",
+				"cast3 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'parquet',",
 				"     umask: 0022,",
