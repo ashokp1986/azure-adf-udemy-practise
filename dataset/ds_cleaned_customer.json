@@ -1,0 +1,23 @@
+{
+	"name": "ds_cleaned_customer",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_cleaned_customer",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "03_cleansed"
+		},
+		"annotations": [],
+		"type": "Parquet",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"folderPath": "customers",
+				"fileSystem": "cleansed"
+			},
+			"compressionCodec": "snappy"
+		},
+		"schema": []
+	}
+}

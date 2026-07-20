@@ -1,0 +1,58 @@
+{
+	"name": "df_customers_raw_to_cleaned",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "ds_landing_customers",
+						"type": "DatasetReference"
+					},
+					"name": "customers"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "ds_cleaned_customer",
+						"type": "DatasetReference"
+					},
+					"name": "cleansedorders"
+				}
+			],
+			"transformations": [
+				{
+					"name": "derivedColumn1"
+				},
+				{
+					"name": "cast3"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          CUSTOMER_ID as string,",
+				"          FULL_NAME as string,",
+				"          EMAIL_ADDRESS as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     documentForm: 'documentPerLine') ~> customers",
+				"customers derive(UPDATED_TIMESTAMP = currentTimestamp()) ~> derivedColumn1",
+				"derivedColumn1 cast(output(",
+				"          CUSTOMER_ID as integer",
+				"     ),",
+				"     errors: true) ~> cast3",
+				"cast3 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'parquet',",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> cleansedorders"
+			]
+		}
+	}
+}
