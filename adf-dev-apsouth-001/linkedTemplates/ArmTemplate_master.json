@@ -15,7 +15,15 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'ls_st_orders'"
 		},
+		"ls_cleaned_customer_accountKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'ls_cleaned_customer'"
+		},
 		"ls_dl_orders_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://dlstoragedevorders001.dfs.core.windows.net/"
+		},
+		"ls_cleaned_customer_properties_typeProperties_url": {
 			"type": "string",
 			"defaultValue": "https://dlstoragedevorders001.dfs.core.windows.net/"
 		},
@@ -52,12 +60,38 @@
 					"ls_st_orders_connectionString": {
 						"value": "[parameters('ls_st_orders_connectionString')]"
 					},
+					"ls_cleaned_customer_accountKey": {
+						"value": "[parameters('ls_cleaned_customer_accountKey')]"
+					},
 					"ls_dl_orders_properties_typeProperties_url": {
 						"value": "[parameters('ls_dl_orders_properties_typeProperties_url')]"
+					},
+					"ls_cleaned_customer_properties_typeProperties_url": {
+						"value": "[parameters('ls_cleaned_customer_properties_typeProperties_url')]"
 					}
 				}
 			},
 			"dependsOn": []
+		},
+		{
+			"name": "adf-dev-apsouth-001_ArmTemplate_1",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2024-03-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_1.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'adf-dev-apsouth-001_ArmTemplate_0')]"
+			]
 		}
 	]
 }
