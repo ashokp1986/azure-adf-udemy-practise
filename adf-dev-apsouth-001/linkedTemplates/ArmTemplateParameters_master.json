@@ -5,19 +5,19 @@
 		"factoryName": {
 			"value": "adf-dev-apsouth-001"
 		},
+		"ls_cleaned_customer_accountKey": {
+			"value": ""
+		},
 		"ls_dl_orders_accountKey": {
 			"value": ""
 		},
 		"ls_st_orders_connectionString": {
 			"value": ""
 		},
-		"ls_cleaned_customer_accountKey": {
-			"value": ""
-		},
-		"ls_dl_orders_properties_typeProperties_url": {
+		"ls_cleaned_customer_properties_typeProperties_url": {
 			"value": "https://dlstoragedevorders001.dfs.core.windows.net/"
 		},
-		"ls_cleaned_customer_properties_typeProperties_url": {
+		"ls_dl_orders_properties_typeProperties_url": {
 			"value": "https://dlstoragedevorders001.dfs.core.windows.net/"
 		},
 		"containerUri": {
