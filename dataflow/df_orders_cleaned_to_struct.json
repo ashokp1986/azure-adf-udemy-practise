@@ -1,6 +1,9 @@
 {
 	"name": "df_orders_cleaned_to_struct",
 	"properties": {
+		"folder": {
+			"name": "struct"
+		},
 		"type": "MappingDataFlow",
 		"typeProperties": {
 			"sources": [
@@ -16,29 +19,83 @@
 						"referenceName": "ds_cleaned_order_items",
 						"type": "DatasetReference"
 					},
-					"name": "orderiteams"
+					"name": "orderitems"
 				}
 			],
-			"sinks": [],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "ds_struct_orderdetails",
+						"type": "DatasetReference"
+					},
+					"name": "orderiteamstruct"
+				}
+			],
 			"transformations": [
 				{
 					"name": "orderjoin"
+				},
+				{
+					"name": "select1"
+				},
+				{
+					"name": "derivedColumn1"
 				}
 			],
 			"scriptLines": [
-				"source(allowSchemaDrift: true,",
+				"source(output(",
+				"          ORDER_ID as integer,",
+				"          ORDER_DATETIME as string,",
+				"          CUSTOMER_ID as integer,",
+				"          ORDER_STATUS as string,",
+				"          STORE_ID as integer,",
+				"          ORDER_TIMESTAMP as timestamp,",
+				"          UPDATED_TIMESTAMP as timestamp,",
+				"          ORDER_DATE as date",
+				"     ),",
+				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     ignoreNoFilesFound: false,",
 				"     format: 'parquet') ~> orders",
-				"source(allowSchemaDrift: true,",
+				"source(output(",
+				"          ORDER_ID as integer,",
+				"          LINE_ITEM_ID as string,",
+				"          PRODUCT_ID as string,",
+				"          UNIT_PRICE as double,",
+				"          QUANTITY as integer,",
+				"          UPDATED_TIMESTAMP as timestamp",
+				"     ),",
+				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     ignoreNoFilesFound: false,",
-				"     format: 'parquet') ~> orderiteams",
-				"orders, orderiteams join(ERROR_FUNCTION('') == ERROR_FUNCTION(''),",
+				"     format: 'parquet') ~> orderitems",
+				"orders, orderitems join(orders@ORDER_ID == orderitems@ORDER_ID,",
 				"     joinType:'left',",
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
-				"     broadcast: 'auto')~> orderjoin"
+				"     broadcast: 'auto')~> orderjoin",
+				"orderjoin select(mapColumn(",
+				"          ORDER_ID = orders@ORDER_ID,",
+				"          ORDER_DATE,",
+				"          CUSTOMER_ID,",
+				"          ORDER_STATUS,",
+				"          STORE_ID,",
+				"          PRODUCT_ID,",
+				"          UNIT_PRICE,",
+				"          QUANTITY",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select1",
+				"select1 derive(SUBTOTAL = UNIT_PRICE*QUANTITY,",
+				"          UPDATED_TIMESTAMP = currentTimestamp()) ~> derivedColumn1",
+				"derivedColumn1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'parquet',",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> orderiteamstruct"
 			]
 		}
 	}
