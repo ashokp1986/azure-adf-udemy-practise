@@ -1,6 +1,9 @@
 {
 	"name": "df_stores_raw_to_cleaned",
 	"properties": {
+		"folder": {
+			"name": "cleansed"
+		},
 		"type": "MappingDataFlow",
 		"typeProperties": {
 			"sources": [
