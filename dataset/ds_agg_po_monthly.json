@@ -1,0 +1,23 @@
+{
+	"name": "ds_agg_po_monthly",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_cleaned_customer",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "05_analytics"
+		},
+		"annotations": [],
+		"type": "Parquet",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"folderPath": "products_order_monthly",
+				"fileSystem": "analytics"
+			},
+			"compressionCodec": "snappy"
+		},
+		"schema": []
+	}
+}
