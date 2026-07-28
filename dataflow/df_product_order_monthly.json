@@ -1,0 +1,59 @@
+{
+	"name": "df_product_order_monthly",
+	"properties": {
+		"folder": {
+			"name": "analytics"
+		},
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"name": "orders"
+				},
+				{
+					"dataset": {
+						"referenceName": "ds_struct_products",
+						"type": "DatasetReference"
+					},
+					"name": "products"
+				}
+			],
+			"sinks": [],
+			"transformations": [
+				{
+					"name": "ordejoinprod"
+				},
+				{
+					"name": "selectcols"
+				}
+			],
+			"scriptLines": [
+				"source(allowSchemaDrift: true,",
+				"     validateSchema: false) ~> orders",
+				"source(output(",
+				"          PRODUCT_ID as integer,",
+				"          PRODUCT_NAME as string,",
+				"          UNIT_PRICE as double,",
+				"          UPDATED_TIMESTAMP as timestamp",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     format: 'parquet') ~> products",
+				"orders, products join(orders@PRODUCT_ID == products@PRODUCT_ID,",
+				"     joinType:'left',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> ordejoinprod",
+				"ordejoinprod select(mapColumn(",
+				"          ORDER_STATUS,",
+				"          SUBTOTAL,",
+				"          PRODUCT_NAME,",
+				"          ORDER_DATE",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> selectcols"
+			]
+		}
+	}
+}

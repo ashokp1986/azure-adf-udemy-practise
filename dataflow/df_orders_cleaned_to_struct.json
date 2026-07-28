@@ -25,7 +25,7 @@
 			"sinks": [
 				{
 					"dataset": {
-						"referenceName": "ds_struct_orderdetails",
+						"referenceName": "ds_struct_orders",
 						"type": "DatasetReference"
 					},
 					"name": "orderiteamstruct"
@@ -40,6 +40,9 @@
 				},
 				{
 					"name": "derivedColumn1"
+				},
+				{
+					"name": "cast1"
 				}
 			],
 			"scriptLines": [
@@ -88,7 +91,11 @@
 				"     skipDuplicateMapOutputs: true) ~> select1",
 				"select1 derive(SUBTOTAL = UNIT_PRICE*QUANTITY,",
 				"          UPDATED_TIMESTAMP = currentTimestamp()) ~> derivedColumn1",
-				"derivedColumn1 sink(allowSchemaDrift: true,",
+				"derivedColumn1 cast(output(",
+				"          PRODUCT_ID as integer",
+				"     ),",
+				"     errors: true) ~> cast1",
+				"cast1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'parquet',",
 				"     umask: 0022,",

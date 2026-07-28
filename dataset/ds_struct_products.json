@@ -5,6 +5,9 @@
 			"referenceName": "ls_cleaned_customer",
 			"type": "LinkedServiceReference"
 		},
+		"folder": {
+			"name": "04_struct"
+		},
 		"annotations": [],
 		"type": "Parquet",
 		"typeProperties": {
