@@ -1,6 +1,9 @@
 {
 	"name": "df_products_cleaned_to_structured",
 	"properties": {
+		"folder": {
+			"name": "struct"
+		},
 		"type": "MappingDataFlow",
 		"typeProperties": {
 			"sources": [
