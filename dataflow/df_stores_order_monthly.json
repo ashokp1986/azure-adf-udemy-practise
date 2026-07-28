@@ -1,5 +1,5 @@
 {
-	"name": "df_product_order_monthly",
+	"name": "df_stores_order_monthly",
 	"properties": {
 		"folder": {
 			"name": "analytics"
@@ -16,16 +16,16 @@
 				},
 				{
 					"dataset": {
-						"referenceName": "ds_struct_products",
+						"referenceName": "df_stuct_stores",
 						"type": "DatasetReference"
 					},
-					"name": "products"
+					"name": "stores"
 				}
 			],
 			"sinks": [
 				{
 					"dataset": {
-						"referenceName": "ds_agg_po_monthly",
+						"referenceName": "df_analytics_stote_order_monthly",
 						"type": "DatasetReference"
 					},
 					"name": "aggregatedoutput"
@@ -58,7 +58,7 @@
 				"          CUSTOMER_ID as integer,",
 				"          ORDER_STATUS as string,",
 				"          STORE_ID as integer,",
-				"          PRODUCT_ID as integer,",
+				"          PRODUCT_ID as string,",
 				"          UNIT_PRICE as double,",
 				"          QUANTITY as integer,",
 				"          SUBTOTAL as double,",
@@ -69,24 +69,28 @@
 				"     ignoreNoFilesFound: false,",
 				"     format: 'parquet') ~> orders",
 				"source(output(",
-				"          PRODUCT_ID as integer,",
-				"          PRODUCT_NAME as string,",
-				"          UNIT_PRICE as double,",
+				"          STORE_ID as integer,",
+				"          STORE_NAME as string,",
+				"          WEB_ADDRESS as double,",
+				"          LATITUDE as string,",
+				"          LONGITUDE as double,",
 				"          UPDATED_TIMESTAMP as timestamp",
 				"     ),",
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     ignoreNoFilesFound: false,",
-				"     format: 'parquet') ~> products",
-				"orders, products join(orders@PRODUCT_ID == products@PRODUCT_ID,",
+				"     format: 'parquet') ~> stores",
+				"orders, stores join(orders@STORE_ID == stores@STORE_ID,",
 				"     joinType:'left',",
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
 				"     broadcast: 'auto')~> ordejoinprod",
 				"ordejoinprod select(mapColumn(",
+				"          STORE_NAME,",
+				"          LATITUDE,",
+				"          LONGITUDE,",
 				"          ORDER_STATUS,",
-				"          SUBTOTAL,",
-				"          PRODUCT_NAME,",
+				"          TOTAL_AMOUNT = SUBTOTAL,",
 				"          ORDER_DATE",
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
@@ -94,12 +98,16 @@
 				"selectcols derive(MONTH_YEAR = toString(ORDER_DATE, 'MM-yyyy')) ~> derivedColumn1",
 				"derivedColumn1 aggregate(groupBy(MONTH_YEAR,",
 				"          ORDER_STATUS,",
-				"          PRODUCT_NAME),",
-				"     SUBTOTAL = sum(SUBTOTAL)) ~> aggregate1",
+				"          LATITUDE,",
+				"          LONGITUDE,",
+				"          STORE_NAME),",
+				"     SUBTOTAL = sum(TOTAL_AMOUNT)) ~> aggregate1",
 				"aggregate1 select(mapColumn(",
 				"          MONTH_YEAR,",
+				"          LATITUDE = STORE_NAME,",
+				"          LATITUDE,",
+				"          LONGITUDE,",
 				"          ORDER_STATUS,",
-				"          PRODUCT_NAME,",
 				"          TOTAL_AMOUNT = SUBTOTAL",
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
