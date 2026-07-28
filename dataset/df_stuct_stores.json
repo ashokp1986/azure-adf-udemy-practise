@@ -1,0 +1,20 @@
+{
+	"name": "df_stuct_stores",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_cleaned_customer",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Parquet",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"folderPath": "stores",
+				"fileSystem": "structured"
+			},
+			"compressionCodec": "snappy"
+		},
+		"schema": []
+	}
+}
