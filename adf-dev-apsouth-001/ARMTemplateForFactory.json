@@ -653,6 +653,9 @@
 					"referenceName": "ls_cleaned_customer",
 					"type": "LinkedServiceReference"
 				},
+				"folder": {
+					"name": "04_struct"
+				},
 				"annotations": [],
 				"type": "Parquet",
 				"typeProperties": {
@@ -705,6 +708,9 @@
 				"linkedServiceName": {
 					"referenceName": "ls_dl_orders",
 					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "03_cleansed"
 				},
 				"annotations": [],
 				"type": "Parquet",
@@ -759,6 +765,9 @@
 					"referenceName": "ls_dl_orders",
 					"type": "LinkedServiceReference"
 				},
+				"folder": {
+					"name": "03_cleansed"
+				},
 				"annotations": [],
 				"type": "Parquet",
 				"typeProperties": {
@@ -783,6 +792,9 @@
 				"linkedServiceName": {
 					"referenceName": "ls_dl_orders",
 					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "03_cleansed"
 				},
 				"annotations": [],
 				"type": "Parquet",
@@ -1176,6 +1188,9 @@
 					"referenceName": "ls_cleaned_customer",
 					"type": "LinkedServiceReference"
 				},
+				"folder": {
+					"name": "04_struct"
+				},
 				"annotations": [],
 				"type": "Parquet",
 				"typeProperties": {
@@ -1407,7 +1422,7 @@
 					"sinks": [
 						{
 							"dataset": {
-								"referenceName": "ds_struct_orderdetails",
+								"referenceName": "ds_struct_orders",
 								"type": "DatasetReference"
 							},
 							"name": "orderiteamstruct"
@@ -1422,6 +1437,9 @@
 						},
 						{
 							"name": "derivedColumn1"
+						},
+						{
+							"name": "cast1"
 						}
 					],
 					"scriptLines": [
@@ -1470,8 +1488,24 @@
 						"     skipDuplicateMapOutputs: true) ~> select1",
 						"select1 derive(SUBTOTAL = UNIT_PRICE*QUANTITY,",
 						"          UPDATED_TIMESTAMP = currentTimestamp()) ~> derivedColumn1",
-						"derivedColumn1 sink(allowSchemaDrift: true,",
+						"derivedColumn1 cast(output(",
+						"          PRODUCT_ID as integer",
+						"     ),",
+						"     errors: true) ~> cast1",
+						"cast1 sink(allowSchemaDrift: true,",
 						"     validateSchema: false,",
+						"     input(",
+						"          ORDER_ID as integer,",
+						"          ORDER_DATE as date,",
+						"          CUSTOMER_ID as integer,",
+						"          ORDER_STATUS as string,",
+						"          STORE_ID as integer,",
+						"          PRODUCT_ID as string,",
+						"          UNIT_PRICE as double,",
+						"          QUANTITY as integer,",
+						"          SUBTOTAL as double,",
+						"          UPDATED_TIMESTAMP as timestamp",
+						"     ),",
 						"     format: 'parquet',",
 						"     umask: 0022,",
 						"     preCommands: [],",
@@ -1484,7 +1518,7 @@
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/ds_cleansed_orders')]",
 				"[concat(variables('factoryId'), '/datasets/ds_cleaned_order_items')]",
-				"[concat(variables('factoryId'), '/datasets/ds_struct_orderdetails')]"
+				"[concat(variables('factoryId'), '/datasets/ds_struct_orders')]"
 			]
 		},
 		{
@@ -1809,7 +1843,445 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/ds_struct_orderdetails')]",
+			"name": "[concat(parameters('factoryName'), '/df_product_order_monthly')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"folder": {
+					"name": "analytics"
+				},
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "ds_struct_orders",
+								"type": "DatasetReference"
+							},
+							"name": "orders"
+						},
+						{
+							"dataset": {
+								"referenceName": "ds_struct_products",
+								"type": "DatasetReference"
+							},
+							"name": "products"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "ds_agg_po_monthly",
+								"type": "DatasetReference"
+							},
+							"name": "aggregatedoutput"
+						}
+					],
+					"transformations": [
+						{
+							"name": "ordejoinprod"
+						},
+						{
+							"name": "selectcols"
+						},
+						{
+							"name": "derivedColumn1"
+						},
+						{
+							"name": "aggregate1"
+						},
+						{
+							"name": "select1"
+						},
+						{
+							"name": "filtercancel"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          ORDER_ID as integer,",
+						"          ORDER_DATE as date,",
+						"          CUSTOMER_ID as integer,",
+						"          ORDER_STATUS as string,",
+						"          STORE_ID as integer,",
+						"          PRODUCT_ID as integer,",
+						"          UNIT_PRICE as double,",
+						"          QUANTITY as integer,",
+						"          SUBTOTAL as double,",
+						"          UPDATED_TIMESTAMP as timestamp",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false,",
+						"     format: 'parquet') ~> orders",
+						"source(output(",
+						"          PRODUCT_ID as integer,",
+						"          PRODUCT_NAME as string,",
+						"          UNIT_PRICE as double,",
+						"          UPDATED_TIMESTAMP as timestamp",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false,",
+						"     format: 'parquet') ~> products",
+						"orders, products join(orders@PRODUCT_ID == products@PRODUCT_ID,",
+						"     joinType:'left',",
+						"     matchType:'exact',",
+						"     ignoreSpaces: false,",
+						"     broadcast: 'auto')~> ordejoinprod",
+						"ordejoinprod select(mapColumn(",
+						"          ORDER_STATUS,",
+						"          SUBTOTAL,",
+						"          PRODUCT_NAME,",
+						"          ORDER_DATE",
+						"     ),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> selectcols",
+						"selectcols derive(MONTH_YEAR = toString(ORDER_DATE, 'MM-yyyy')) ~> derivedColumn1",
+						"derivedColumn1 aggregate(groupBy(MONTH_YEAR,",
+						"          ORDER_STATUS,",
+						"          PRODUCT_NAME),",
+						"     SUBTOTAL = sum(SUBTOTAL)) ~> aggregate1",
+						"aggregate1 select(mapColumn(",
+						"          MONTH_YEAR,",
+						"          ORDER_STATUS,",
+						"          PRODUCT_NAME,",
+						"          TOTAL_AMOUNT = SUBTOTAL",
+						"     ),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> select1",
+						"select1 filter(ORDER_STATUS!=\"CANCELLED\") ~> filtercancel",
+						"filtercancel sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     format: 'parquet',",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> aggregatedoutput"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/ds_struct_orders')]",
+				"[concat(variables('factoryId'), '/datasets/ds_struct_products')]",
+				"[concat(variables('factoryId'), '/datasets/ds_agg_po_monthly')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ds_struct_orders')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_cleaned_customer",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "04_struct"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": "orders",
+						"fileSystem": "structured"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": [
+					{
+						"name": "ORDER_ID",
+						"type": "INT32"
+					},
+					{
+						"name": "ORDER_DATE",
+						"type": "DATE"
+					},
+					{
+						"name": "CUSTOMER_ID",
+						"type": "INT32"
+					},
+					{
+						"name": "ORDER_STATUS",
+						"type": "UTF8"
+					},
+					{
+						"name": "STORE_ID",
+						"type": "INT32"
+					},
+					{
+						"name": "PRODUCT_ID",
+						"type": "UTF8"
+					},
+					{
+						"name": "UNIT_PRICE",
+						"type": "DOUBLE"
+					},
+					{
+						"name": "QUANTITY",
+						"type": "INT32"
+					},
+					{
+						"name": "SUBTOTAL",
+						"type": "DOUBLE"
+					},
+					{
+						"name": "UPDATED_TIMESTAMP",
+						"type": "INT96"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ls_cleaned_customer')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ds_agg_po_monthly')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_cleaned_customer",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "05_analytics"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": "products_order_monthly",
+						"fileSystem": "analytics"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ls_cleaned_customer')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/pl_load_struct_to_analytics')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "df_product_order_monthly",
+						"type": "ExecuteDataFlow",
+						"state": "Inactive",
+						"onInactiveMarkAs": "Succeeded",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "df_product_order_monthly",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"orders": {},
+									"products": {},
+									"aggregatedoutput": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					},
+					{
+						"name": "df_stores_order_monthly",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "df_stores_order_monthly",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"orders": {},
+									"stores": {},
+									"aggregatedoutput": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/dataflows/df_product_order_monthly')]",
+				"[concat(variables('factoryId'), '/dataflows/df_stores_order_monthly')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/df_stores_order_monthly')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"folder": {
+					"name": "analytics"
+				},
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "ds_struct_orders",
+								"type": "DatasetReference"
+							},
+							"name": "orders"
+						},
+						{
+							"dataset": {
+								"referenceName": "df_stuct_stores",
+								"type": "DatasetReference"
+							},
+							"name": "stores"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "df_analytics_stote_order_monthly",
+								"type": "DatasetReference"
+							},
+							"name": "aggregatedoutput"
+						}
+					],
+					"transformations": [
+						{
+							"name": "ordejoinprod"
+						},
+						{
+							"name": "selectcols"
+						},
+						{
+							"name": "derivedColumn1"
+						},
+						{
+							"name": "aggregate1"
+						},
+						{
+							"name": "select1"
+						},
+						{
+							"name": "filtercancel"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          ORDER_ID as integer,",
+						"          ORDER_DATE as date,",
+						"          CUSTOMER_ID as integer,",
+						"          ORDER_STATUS as string,",
+						"          STORE_ID as integer,",
+						"          PRODUCT_ID as string,",
+						"          UNIT_PRICE as double,",
+						"          QUANTITY as integer,",
+						"          SUBTOTAL as double,",
+						"          UPDATED_TIMESTAMP as timestamp",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false,",
+						"     format: 'parquet') ~> orders",
+						"source(output(",
+						"          STORE_ID as integer,",
+						"          STORE_NAME as string,",
+						"          WEB_ADDRESS as double,",
+						"          LATITUDE as string,",
+						"          LONGITUDE as double,",
+						"          UPDATED_TIMESTAMP as timestamp",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false,",
+						"     format: 'parquet') ~> stores",
+						"orders, stores join(orders@STORE_ID == stores@STORE_ID,",
+						"     joinType:'left',",
+						"     matchType:'exact',",
+						"     ignoreSpaces: false,",
+						"     broadcast: 'auto')~> ordejoinprod",
+						"ordejoinprod select(mapColumn(",
+						"          STORE_NAME,",
+						"          LATITUDE,",
+						"          LONGITUDE,",
+						"          ORDER_STATUS,",
+						"          TOTAL_AMOUNT = SUBTOTAL,",
+						"          ORDER_DATE",
+						"     ),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> selectcols",
+						"selectcols derive(MONTH_YEAR = toString(ORDER_DATE, 'MM-yyyy')) ~> derivedColumn1",
+						"derivedColumn1 aggregate(groupBy(MONTH_YEAR,",
+						"          ORDER_STATUS,",
+						"          LATITUDE,",
+						"          LONGITUDE,",
+						"          STORE_NAME),",
+						"     SUBTOTAL = sum(TOTAL_AMOUNT)) ~> aggregate1",
+						"aggregate1 select(mapColumn(",
+						"          MONTH_YEAR,",
+						"          LATITUDE = STORE_NAME,",
+						"          LATITUDE,",
+						"          LONGITUDE,",
+						"          ORDER_STATUS,",
+						"          TOTAL_AMOUNT = SUBTOTAL",
+						"     ),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> select1",
+						"select1 filter(ORDER_STATUS!=\"CANCELLED\") ~> filtercancel",
+						"filtercancel sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     format: 'parquet',",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> aggregatedoutput"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/ds_struct_orders')]",
+				"[concat(variables('factoryId'), '/datasets/df_stuct_stores')]",
+				"[concat(variables('factoryId'), '/datasets/df_analytics_stote_order_monthly')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/df_analytics_stote_order_monthly')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -1822,8 +2294,8 @@
 				"typeProperties": {
 					"location": {
 						"type": "AzureBlobFSLocation",
-						"folderPath": "orders",
-						"fileSystem": "structured"
+						"folderPath": "store_order_monthly",
+						"fileSystem": "analytics"
 					},
 					"compressionCodec": "snappy"
 				},
@@ -1832,26 +2304,6 @@
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/ls_cleaned_customer')]"
 			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/dataflow1')]",
-			"type": "Microsoft.DataFactory/factories/dataflows",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"folder": {
-					"name": "analytics"
-				},
-				"type": "MappingDataFlow",
-				"typeProperties": {
-					"sources": [],
-					"sinks": [],
-					"transformations": [],
-					"scriptLines": [
-						""
-					]
-				}
-			},
-			"dependsOn": []
 		}
 	]
 }

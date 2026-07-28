@@ -80,26 +80,6 @@
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/dataflow1')]",
-			"type": "Microsoft.DataFactory/factories/dataflows",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"folder": {
-					"name": "analytics"
-				},
-				"type": "MappingDataFlow",
-				"typeProperties": {
-					"sources": [],
-					"sinks": [],
-					"transformations": [],
-					"scriptLines": [
-						""
-					]
-				}
-			},
-			"dependsOn": []
-		},
-		{
 			"name": "[concat(parameters('factoryName'), '/df_stuct_stores')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -107,6 +87,9 @@
 				"linkedServiceName": {
 					"referenceName": "ls_cleaned_customer",
 					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "04_struct"
 				},
 				"annotations": [],
 				"type": "Parquet",
@@ -161,6 +144,9 @@
 					"referenceName": "ls_dl_orders",
 					"type": "LinkedServiceReference"
 				},
+				"folder": {
+					"name": "03_cleansed"
+				},
 				"annotations": [],
 				"type": "Parquet",
 				"typeProperties": {
@@ -214,6 +200,9 @@
 					"referenceName": "ls_dl_orders",
 					"type": "LinkedServiceReference"
 				},
+				"folder": {
+					"name": "03_cleansed"
+				},
 				"annotations": [],
 				"type": "Parquet",
 				"typeProperties": {
@@ -238,6 +227,9 @@
 				"linkedServiceName": {
 					"referenceName": "ls_dl_orders",
 					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "03_cleansed"
 				},
 				"annotations": [],
 				"type": "Parquet",
@@ -620,6 +612,34 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/ls_dl_orders')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ds_struct_products')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_cleaned_customer",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "04_struct"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": "products",
+						"fileSystem": "structured"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ls_cleaned_customer')]"
 			]
 		}
 	]
