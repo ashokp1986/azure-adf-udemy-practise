@@ -13,7 +13,7 @@
 		],
 		"type": "BlobEventsTrigger",
 		"typeProperties": {
-			"blobPathBeginsWith": "/landing/blobs/order_items",
+			"blobPathBeginsWith": "/landing/blobs/*",
 			"blobPathEndsWith": ".txt",
 			"ignoreEmptyBlobs": true,
 			"scope": "/subscriptions/e1cd3b9d-9afb-4f5f-927a-95cac124257b/resourceGroups/rg-orders-dev-apsouth-001/providers/Microsoft.Storage/storageAccounts/storagedevorders001",
