@@ -5,6 +5,9 @@
 		"factoryName": {
 			"value": "adf-dev-apsouth-001"
 		},
+		"ls_azure_blob_storage_connectionString": {
+			"value": ""
+		},
 		"ls_cleaned_customer_accountKey": {
 			"value": ""
 		},
@@ -19,6 +22,9 @@
 		},
 		"ls_dl_orders_properties_typeProperties_url": {
 			"value": "https://dlstoragedevorders001.dfs.core.windows.net/"
+		},
+		"tg_storage_event_test_properties_typeProperties_scope": {
+			"value": "/subscriptions/e1cd3b9d-9afb-4f5f-927a-95cac124257b/resourceGroups/rg-orders-dev-apsouth-001/providers/Microsoft.Storage/storageAccounts/storagedevorders001"
 		}
 	}
 }
