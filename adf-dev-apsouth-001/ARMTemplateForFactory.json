@@ -1736,7 +1736,7 @@
 				],
 				"type": "BlobEventsTrigger",
 				"typeProperties": {
-					"blobPathBeginsWith": "/landing/blobs/order_items",
+					"blobPathBeginsWith": "/landing/blobs/*",
 					"blobPathEndsWith": ".txt",
 					"ignoreEmptyBlobs": true,
 					"scope": "[parameters('tg_storage_event_test_properties_typeProperties_scope')]",
