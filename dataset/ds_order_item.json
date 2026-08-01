@@ -10,6 +10,7 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobStorageLocation",
+				"fileName": "order_items.txt",
 				"container": "landing"
 			},
 			"columnDelimiter": ",",
