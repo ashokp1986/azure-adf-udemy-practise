@@ -1,0 +1,40 @@
+{
+	"name": "ds_products_sqldb",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "sqlserver_order_dev",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "Azure_SQL"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "PRODUCT_ID",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "PRODUCT_NAME",
+				"type": "varchar"
+			},
+			{
+				"name": "UNIT_PRICE",
+				"type": "decimal",
+				"precision": 18,
+				"scale": 0
+			},
+			{
+				"name": "UPDATED_TIMESTAMP",
+				"type": "datetime2",
+				"scale": 7
+			}
+		],
+		"typeProperties": {
+			"schema": "ORDERS",
+			"table": "PRODUCTS"
+		}
+	}
+}
