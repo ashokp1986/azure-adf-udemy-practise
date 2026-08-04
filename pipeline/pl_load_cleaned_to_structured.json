@@ -5,8 +5,6 @@
 			{
 				"name": "df_products_cleaned_to_structured",
 				"type": "ExecuteDataFlow",
-				"state": "Inactive",
-				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [],
 				"policy": {
 					"timeout": "0.12:00:00",
@@ -31,8 +29,6 @@
 			{
 				"name": "df_stores_cleaned_to_structured",
 				"type": "ExecuteDataFlow",
-				"state": "Inactive",
-				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [],
 				"policy": {
 					"timeout": "0.12:00:00",
