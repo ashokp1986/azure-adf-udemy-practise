@@ -10,6 +10,9 @@
 				"type": "String"
 			}
 		},
+		"folder": {
+			"name": "practise"
+		},
 		"annotations": [],
 		"type": "DelimitedText",
 		"typeProperties": {
