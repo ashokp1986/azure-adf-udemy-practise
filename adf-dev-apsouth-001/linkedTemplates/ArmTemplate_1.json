@@ -26,6 +26,9 @@
 						"type": "String"
 					}
 				},
+				"folder": {
+					"name": "practise"
+				},
 				"annotations": [],
 				"type": "DelimitedText",
 				"typeProperties": {
@@ -86,6 +89,10 @@
 					"location": {
 						"type": "AzureBlobFSLocation",
 						"fileName": "customers.json",
+						"folderPath": {
+							"value": "@formatDateTime(utcNow(),'yyyy-MM-dd')",
+							"type": "Expression"
+						},
 						"fileSystem": "raw"
 					}
 				},
@@ -111,6 +118,10 @@
 					"location": {
 						"type": "AzureBlobFSLocation",
 						"fileName": "order_items.txt",
+						"folderPath": {
+							"value": "@formatDateTime(utcNow(),'yyyy-MM-dd')",
+							"type": "Expression"
+						},
 						"fileSystem": "raw"
 					},
 					"columnDelimiter": ",",
@@ -140,6 +151,10 @@
 					"location": {
 						"type": "AzureBlobFSLocation",
 						"fileName": "orders.parquet",
+						"folderPath": {
+							"value": "@formatDateTime(utcNow(),'yyyy-MM-dd')",
+							"type": "Expression"
+						},
 						"fileSystem": "raw"
 					},
 					"compressionCodec": "snappy"
@@ -166,6 +181,10 @@
 					"location": {
 						"type": "AzureBlobFSLocation",
 						"fileName": "products.json",
+						"folderPath": {
+							"value": "@formatDateTime(utcNow(),'yyyy-MM-dd')",
+							"type": "Expression"
+						},
 						"fileSystem": "raw"
 					}
 				},
@@ -191,6 +210,10 @@
 					"location": {
 						"type": "AzureBlobFSLocation",
 						"fileName": "store.json",
+						"folderPath": {
+							"value": "@formatDateTime(utcNow(),'yyyy-MM-dd')",
+							"type": "Expression"
+						},
 						"fileSystem": "raw"
 					}
 				},
@@ -1208,7 +1231,11 @@
 						"     preCommands: [],",
 						"     postCommands: [],",
 						"     skipDuplicateMapInputs: true,",
-						"     skipDuplicateMapOutputs: true) ~> orderiteamstruct"
+						"     skipDuplicateMapOutputs: true,",
+						"     partitionBy('key',",
+						"          0,",
+						"          ORDER_DATE",
+						"     )) ~> orderiteamstruct"
 					]
 				}
 			},
@@ -1452,11 +1479,13 @@
 						"addcustomfields sink(allowSchemaDrift: true,",
 						"     validateSchema: false,",
 						"     format: 'parquet',",
+						"     partitionFileNames:['products.parquet'],",
 						"     umask: 0022,",
 						"     preCommands: [],",
 						"     postCommands: [],",
 						"     skipDuplicateMapInputs: true,",
-						"     skipDuplicateMapOutputs: true) ~> structuredproduct"
+						"     skipDuplicateMapOutputs: true,",
+						"     partitionBy('hash', 1)) ~> structuredproduct"
 					]
 				}
 			},
@@ -1571,11 +1600,13 @@
 						"addcustomfields sink(allowSchemaDrift: true,",
 						"     validateSchema: false,",
 						"     format: 'parquet',",
+						"     partitionFileNames:['stores.parquet'],",
 						"     umask: 0022,",
 						"     preCommands: [],",
 						"     postCommands: [],",
 						"     skipDuplicateMapInputs: true,",
-						"     skipDuplicateMapOutputs: true) ~> structuredproduct"
+						"     skipDuplicateMapOutputs: true,",
+						"     partitionBy('hash', 1)) ~> structuredproduct"
 					]
 				}
 			},
