@@ -13,6 +13,53 @@
 	},
 	"resources": [
 		{
+			"name": "[concat(parameters('factoryName'), '/ds_orders_sink_test')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_dl_orders",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": "sink",
+						"fileSystem": "test"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "ORDER_ID",
+						"type": "String"
+					},
+					{
+						"name": "ORDER_DATETIME",
+						"type": "String"
+					},
+					{
+						"name": "CUSTOMER_ID",
+						"type": "String"
+					},
+					{
+						"name": "ORDER_STATUS",
+						"type": "String"
+					},
+					{
+						"name": "STORE_ID",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/ds_orders_src_test')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -588,6 +635,9 @@
 				"policy": {
 					"elapsedTimeMetric": {}
 				},
+				"folder": {
+					"name": "project"
+				},
 				"annotations": []
 			},
 			"dependsOn": [
@@ -667,6 +717,9 @@
 				],
 				"policy": {
 					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "project"
 				},
 				"annotations": []
 			},
@@ -1427,74 +1480,6 @@
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/ds_struct_orders')]"
 			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/df_stores_raw_to_cleaned')]",
-			"type": "Microsoft.DataFactory/factories/dataflows",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"folder": {
-					"name": "cleansed"
-				},
-				"type": "MappingDataFlow",
-				"typeProperties": {
-					"sources": [
-						{
-							"dataset": {
-								"referenceName": "ds_landing_store",
-								"type": "DatasetReference"
-							},
-							"name": "stores"
-						}
-					],
-					"sinks": [
-						{
-							"dataset": {
-								"referenceName": "ds_cleansed_stores",
-								"type": "DatasetReference"
-							},
-							"name": "cleansedorders"
-						}
-					],
-					"transformations": [
-						{
-							"name": "derivedColumn1"
-						},
-						{
-							"name": "cast3"
-						}
-					],
-					"scriptLines": [
-						"source(output(",
-						"          STORE_ID as string,",
-						"          STORE_NAME as string,",
-						"          WEB_ADDRESS as string,",
-						"          LATITUDE as string,",
-						"          LONGITUDE as string",
-						"     ),",
-						"     allowSchemaDrift: true,",
-						"     validateSchema: false,",
-						"     ignoreNoFilesFound: false,",
-						"     documentForm: 'documentPerLine') ~> stores",
-						"stores derive(UPDATED_TIMESTAMP = currentTimestamp()) ~> derivedColumn1",
-						"derivedColumn1 cast(output(",
-						"          STORE_ID as integer,",
-						"          WEB_ADDRESS as double,",
-						"          LONGITUDE as double",
-						"     ),",
-						"     errors: true) ~> cast3",
-						"cast3 sink(allowSchemaDrift: true,",
-						"     validateSchema: false,",
-						"     format: 'parquet',",
-						"     umask: 0022,",
-						"     preCommands: [],",
-						"     postCommands: [],",
-						"     skipDuplicateMapInputs: true,",
-						"     skipDuplicateMapOutputs: true) ~> cleansedorders"
-					]
-				}
-			},
-			"dependsOn": []
 		}
 	]
 }
