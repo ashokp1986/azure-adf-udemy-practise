@@ -43,6 +43,9 @@
 				},
 				{
 					"name": "cast1"
+				},
+				{
+					"name": "select2"
 				}
 			],
 			"scriptLines": [
@@ -93,10 +96,26 @@
 				"          SUBTOTAL = UNIT_PRICE*QUANTITY,",
 				"          UPDATED_TIMESTAMP = currentTimestamp()) ~> derivedColumn1",
 				"derivedColumn1 cast(output(",
-				"          PRODUCT_ID as integer",
+				"          ORDER_ID as integer,",
+				"          ORDER_ITEM_ID as integer",
 				"     ),",
 				"     errors: true) ~> cast1",
-				"cast1 sink(allowSchemaDrift: true,",
+				"cast1 select(mapColumn(",
+				"          ORDER_ID,",
+				"          ORDER_DATE,",
+				"          CUSTOMER_ID,",
+				"          ORDER_STATUS,",
+				"          STORE_ID,",
+				"          PRODUCT_ID,",
+				"          UNIT_PRICE,",
+				"          QUANTITY,",
+				"          ORDER_ITEM_ID,",
+				"          SUBTOTAL,",
+				"          UPDATED_TIMESTAMP",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select2",
+				"select2 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",
 				"          ORDER_ID as integer,",
