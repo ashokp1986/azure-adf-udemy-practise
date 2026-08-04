@@ -17,6 +17,136 @@
 	},
 	"resources": [
 		{
+			"name": "[concat(parameters('factoryName'), '/df_stores_order_monthly')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"folder": {
+					"name": "analytics"
+				},
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "ds_struct_orders",
+								"type": "DatasetReference"
+							},
+							"name": "orders"
+						},
+						{
+							"dataset": {
+								"referenceName": "df_stuct_stores",
+								"type": "DatasetReference"
+							},
+							"name": "stores"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "df_analytics_stote_order_monthly",
+								"type": "DatasetReference"
+							},
+							"name": "aggregatedoutput"
+						}
+					],
+					"transformations": [
+						{
+							"name": "ordejoinprod"
+						},
+						{
+							"name": "selectcols"
+						},
+						{
+							"name": "derivedColumn1"
+						},
+						{
+							"name": "aggregate1"
+						},
+						{
+							"name": "select1"
+						},
+						{
+							"name": "filtercancel"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          ORDER_ID as integer,",
+						"          ORDER_DATE as date,",
+						"          CUSTOMER_ID as integer,",
+						"          ORDER_STATUS as string,",
+						"          STORE_ID as integer,",
+						"          PRODUCT_ID as string,",
+						"          UNIT_PRICE as double,",
+						"          QUANTITY as integer,",
+						"          SUBTOTAL as double,",
+						"          UPDATED_TIMESTAMP as timestamp",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false,",
+						"     format: 'parquet') ~> orders",
+						"source(output(",
+						"          STORE_ID as integer,",
+						"          STORE_NAME as string,",
+						"          WEB_ADDRESS as double,",
+						"          LATITUDE as string,",
+						"          LONGITUDE as double,",
+						"          UPDATED_TIMESTAMP as timestamp",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false,",
+						"     format: 'parquet') ~> stores",
+						"orders, stores join(orders@STORE_ID == stores@STORE_ID,",
+						"     joinType:'left',",
+						"     matchType:'exact',",
+						"     ignoreSpaces: false,",
+						"     broadcast: 'auto')~> ordejoinprod",
+						"ordejoinprod select(mapColumn(",
+						"          STORE_NAME,",
+						"          LATITUDE,",
+						"          LONGITUDE,",
+						"          ORDER_STATUS,",
+						"          TOTAL_AMOUNT = SUBTOTAL,",
+						"          ORDER_DATE",
+						"     ),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> selectcols",
+						"selectcols derive(MONTH_YEAR = toString(ORDER_DATE, 'MM-yyyy')) ~> derivedColumn1",
+						"derivedColumn1 aggregate(groupBy(MONTH_YEAR,",
+						"          ORDER_STATUS,",
+						"          LATITUDE,",
+						"          LONGITUDE,",
+						"          STORE_NAME),",
+						"     SUBTOTAL = sum(TOTAL_AMOUNT)) ~> aggregate1",
+						"aggregate1 select(mapColumn(",
+						"          MONTH_YEAR,",
+						"          LATITUDE = STORE_NAME,",
+						"          LATITUDE,",
+						"          LONGITUDE,",
+						"          ORDER_STATUS,",
+						"          TOTAL_AMOUNT = SUBTOTAL",
+						"     ),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> select1",
+						"select1 filter(ORDER_STATUS!=\"CANCELLED\") ~> filtercancel",
+						"filtercancel sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     format: 'parquet',",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> aggregatedoutput"
+					]
+				}
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/df_stores_raw_to_cleaned')]",
 			"type": "Microsoft.DataFactory/factories/dataflows",
 			"apiVersion": "2018-06-01",
@@ -275,7 +405,9 @@
 				},
 				"annotations": []
 			},
-			"dependsOn": []
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/dataflows/df_stores_order_monthly')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/pl_raw_to_cleansed')]",
