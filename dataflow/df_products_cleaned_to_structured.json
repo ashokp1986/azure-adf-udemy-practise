@@ -38,11 +38,13 @@
 				"addcustomfields sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'parquet',",
+				"     partitionFileNames:['products.parquet'],",
 				"     umask: 0022,",
 				"     preCommands: [],",
 				"     postCommands: [],",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> structuredproduct"
+				"     skipDuplicateMapOutputs: true,",
+				"     partitionBy('hash', 1)) ~> structuredproduct"
 			]
 		}
 	}

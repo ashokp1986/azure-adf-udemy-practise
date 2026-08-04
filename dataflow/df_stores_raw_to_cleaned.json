@@ -54,13 +54,11 @@
 				"cast3 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'parquet',",
-				"     partitionFileNames:[''],",
 				"     umask: 0022,",
 				"     preCommands: [],",
 				"     postCommands: [],",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true,",
-				"     partitionBy('hash', 1)) ~> cleansedorders"
+				"     skipDuplicateMapOutputs: true) ~> cleansedorders"
 			]
 		}
 	}
