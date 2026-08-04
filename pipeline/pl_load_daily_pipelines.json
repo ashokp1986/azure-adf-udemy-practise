@@ -88,6 +88,9 @@
 				}
 			}
 		],
+		"folder": {
+			"name": "project"
+		},
 		"annotations": []
 	}
 }
