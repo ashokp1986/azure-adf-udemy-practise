@@ -67,6 +67,8 @@
 			{
 				"name": "pl_load_struct_to_analytics",
 				"type": "ExecutePipeline",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "pl_load_cleaned_to_structured",
