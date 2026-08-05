@@ -23,6 +23,10 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'ls_st_orders'"
 		},
+		"sqlserver_order_dev_password": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'sqlserver_order_dev'"
+		},
 		"ls_cleaned_customer_properties_typeProperties_url": {
 			"type": "string",
 			"defaultValue": "https://dlstoragedevorders001.dfs.core.windows.net/"
@@ -30,6 +34,18 @@
 		"ls_dl_orders_properties_typeProperties_url": {
 			"type": "string",
 			"defaultValue": "https://dlstoragedevorders001.dfs.core.windows.net/"
+		},
+		"sqlserver_order_dev_properties_typeProperties_server": {
+			"type": "string",
+			"defaultValue": "sqlserver-orders-dev-1.database.windows.net"
+		},
+		"sqlserver_order_dev_properties_typeProperties_database": {
+			"type": "string",
+			"defaultValue": "sqldb-orders-dev"
+		},
+		"sqlserver_order_dev_properties_typeProperties_userName": {
+			"type": "string",
+			"defaultValue": "sqladmin"
 		},
 		"tg_storage_event_test_properties_typeProperties_scope": {
 			"type": "string",
@@ -74,11 +90,23 @@
 					"ls_st_orders_connectionString": {
 						"value": "[parameters('ls_st_orders_connectionString')]"
 					},
+					"sqlserver_order_dev_password": {
+						"value": "[parameters('sqlserver_order_dev_password')]"
+					},
 					"ls_cleaned_customer_properties_typeProperties_url": {
 						"value": "[parameters('ls_cleaned_customer_properties_typeProperties_url')]"
 					},
 					"ls_dl_orders_properties_typeProperties_url": {
 						"value": "[parameters('ls_dl_orders_properties_typeProperties_url')]"
+					},
+					"sqlserver_order_dev_properties_typeProperties_server": {
+						"value": "[parameters('sqlserver_order_dev_properties_typeProperties_server')]"
+					},
+					"sqlserver_order_dev_properties_typeProperties_database": {
+						"value": "[parameters('sqlserver_order_dev_properties_typeProperties_database')]"
+					},
+					"sqlserver_order_dev_properties_typeProperties_userName": {
+						"value": "[parameters('sqlserver_order_dev_properties_typeProperties_userName')]"
 					}
 				}
 			},

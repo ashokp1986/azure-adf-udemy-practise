@@ -23,6 +23,10 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'ls_st_orders'"
 		},
+		"sqlserver_order_dev_password": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'sqlserver_order_dev'"
+		},
 		"ls_cleaned_customer_properties_typeProperties_url": {
 			"type": "string",
 			"defaultValue": "https://dlstoragedevorders001.dfs.core.windows.net/"
@@ -30,6 +34,18 @@
 		"ls_dl_orders_properties_typeProperties_url": {
 			"type": "string",
 			"defaultValue": "https://dlstoragedevorders001.dfs.core.windows.net/"
+		},
+		"sqlserver_order_dev_properties_typeProperties_server": {
+			"type": "string",
+			"defaultValue": "sqlserver-orders-dev-1.database.windows.net"
+		},
+		"sqlserver_order_dev_properties_typeProperties_database": {
+			"type": "string",
+			"defaultValue": "sqldb-orders-dev"
+		},
+		"sqlserver_order_dev_properties_typeProperties_userName": {
+			"type": "string",
+			"defaultValue": "sqladmin"
 		},
 		"tg_storage_event_test_properties_typeProperties_scope": {
 			"type": "string",
@@ -497,6 +513,8 @@
 					{
 						"name": "pl_load_struct_to_analytics",
 						"type": "ExecutePipeline",
+						"state": "Inactive",
+						"onInactiveMarkAs": "Succeeded",
 						"dependsOn": [
 							{
 								"activity": "pl_load_cleaned_to_structured",
@@ -1784,6 +1802,86 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/ds_orders_sqldb')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "sqlserver_order_dev",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "Azure_SQL"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "ORDER_ITEM_ID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "ORDER_ID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "ORDER_DATE",
+						"type": "date"
+					},
+					{
+						"name": "CUSTOMER_ID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "ORDER_STATUS",
+						"type": "varchar"
+					},
+					{
+						"name": "STORE_ID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "PRODUCT_ID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "UNIT_PRICE",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 0
+					},
+					{
+						"name": "QUANTITY",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "SUBTOTAL",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 0
+					},
+					{
+						"name": "UPDATED_TIMESTAMP",
+						"type": "datetime2",
+						"scale": 7
+					}
+				],
+				"typeProperties": {
+					"schema": "ORDERS",
+					"table": "ORDERS"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/sqlserver_order_dev')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/ds_orders_src_test')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -1842,6 +1940,51 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/ls_dl_orders')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ds_products_sqldb')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "sqlserver_order_dev",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "Azure_SQL"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "PRODUCT_ID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "PRODUCT_NAME",
+						"type": "varchar"
+					},
+					{
+						"name": "UNIT_PRICE",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 0
+					},
+					{
+						"name": "UPDATED_TIMESTAMP",
+						"type": "datetime2",
+						"scale": 7
+					}
+				],
+				"typeProperties": {
+					"schema": "ORDERS",
+					"table": "PRODUCTS"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/sqlserver_order_dev')]"
 			]
 		},
 		{
@@ -2005,6 +2148,57 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/ds_stores_sqldb')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "sqlserver_order_dev",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "Azure_SQL"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "STORE_ID",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "STORE_NAME",
+						"type": "varchar"
+					},
+					{
+						"name": "LATITUDE",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 0
+					},
+					{
+						"name": "LONGITUDE",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 0
+					},
+					{
+						"name": "UPDATED_TIMESTAMP",
+						"type": "datetime2",
+						"scale": 7
+					}
+				],
+				"typeProperties": {
+					"schema": "ORDERS",
+					"table": "STORES"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/sqlserver_order_dev')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/ds_struct_orders')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -2157,6 +2351,28 @@
 				"type": "AzureBlobStorage",
 				"typeProperties": {
 					"connectionString": "[parameters('ls_st_orders_connectionString')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/sqlserver_order_dev')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureSqlDatabase",
+				"typeProperties": {
+					"server": "[parameters('sqlserver_order_dev_properties_typeProperties_server')]",
+					"database": "[parameters('sqlserver_order_dev_properties_typeProperties_database')]",
+					"encrypt": "mandatory",
+					"trustServerCertificate": false,
+					"authenticationType": "SQL",
+					"userName": "[parameters('sqlserver_order_dev_properties_typeProperties_userName')]",
+					"password": {
+						"type": "SecureString",
+						"value": "[parameters('sqlserver_order_dev_password')]"
+					}
 				}
 			},
 			"dependsOn": []
@@ -2378,6 +2594,9 @@
 						},
 						{
 							"name": "cast1"
+						},
+						{
+							"name": "select2"
 						}
 					],
 					"scriptLines": [
@@ -2424,13 +2643,30 @@
 						"     ),",
 						"     skipDuplicateMapInputs: true,",
 						"     skipDuplicateMapOutputs: true) ~> select1",
-						"select1 derive(SUBTOTAL = UNIT_PRICE*QUANTITY,",
+						"select1 derive(ORDER_ITEM_ID = concat(toString(ORDER_ID),toString(PRODUCT_ID)),",
+						"          SUBTOTAL = UNIT_PRICE*QUANTITY,",
 						"          UPDATED_TIMESTAMP = currentTimestamp()) ~> derivedColumn1",
 						"derivedColumn1 cast(output(",
-						"          PRODUCT_ID as integer",
+						"          ORDER_ID as integer,",
+						"          ORDER_ITEM_ID as integer",
 						"     ),",
 						"     errors: true) ~> cast1",
-						"cast1 sink(allowSchemaDrift: true,",
+						"cast1 select(mapColumn(",
+						"          ORDER_ITEM_ID,",
+						"          ORDER_ID,",
+						"          ORDER_DATE,",
+						"          CUSTOMER_ID,",
+						"          ORDER_STATUS,",
+						"          STORE_ID,",
+						"          PRODUCT_ID,",
+						"          UNIT_PRICE,",
+						"          QUANTITY,",
+						"          SUBTOTAL,",
+						"          UPDATED_TIMESTAMP",
+						"     ),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> select2",
+						"select2 sink(allowSchemaDrift: true,",
 						"     validateSchema: false,",
 						"     input(",
 						"          ORDER_ID as integer,",

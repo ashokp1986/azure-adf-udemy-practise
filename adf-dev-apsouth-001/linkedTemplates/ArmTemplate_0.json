@@ -23,6 +23,10 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'ls_st_orders'"
 		},
+		"sqlserver_order_dev_password": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'sqlserver_order_dev'"
+		},
 		"ls_cleaned_customer_properties_typeProperties_url": {
 			"type": "string",
 			"defaultValue": "https://dlstoragedevorders001.dfs.core.windows.net/"
@@ -30,6 +34,18 @@
 		"ls_dl_orders_properties_typeProperties_url": {
 			"type": "string",
 			"defaultValue": "https://dlstoragedevorders001.dfs.core.windows.net/"
+		},
+		"sqlserver_order_dev_properties_typeProperties_server": {
+			"type": "string",
+			"defaultValue": "sqlserver-orders-dev-1.database.windows.net"
+		},
+		"sqlserver_order_dev_properties_typeProperties_database": {
+			"type": "string",
+			"defaultValue": "sqldb-orders-dev"
+		},
+		"sqlserver_order_dev_properties_typeProperties_userName": {
+			"type": "string",
+			"defaultValue": "sqladmin"
 		}
 	},
 	"variables": {
@@ -92,6 +108,28 @@
 				"type": "AzureBlobStorage",
 				"typeProperties": {
 					"connectionString": "[parameters('ls_st_orders_connectionString')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/sqlserver_order_dev')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureSqlDatabase",
+				"typeProperties": {
+					"server": "[parameters('sqlserver_order_dev_properties_typeProperties_server')]",
+					"database": "[parameters('sqlserver_order_dev_properties_typeProperties_database')]",
+					"encrypt": "mandatory",
+					"trustServerCertificate": false,
+					"authenticationType": "SQL",
+					"userName": "[parameters('sqlserver_order_dev_properties_typeProperties_userName')]",
+					"password": {
+						"type": "SecureString",
+						"value": "[parameters('sqlserver_order_dev_password')]"
+					}
 				}
 			},
 			"dependsOn": []
@@ -621,67 +659,6 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/ls_azure_blob_storage')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/ds_orders_sink_test')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "ls_dl_orders",
-					"type": "LinkedServiceReference"
-				},
-				"parameters": {
-					"pSinkFileName": {
-						"type": "String"
-					}
-				},
-				"folder": {
-					"name": "practise"
-				},
-				"annotations": [],
-				"type": "DelimitedText",
-				"typeProperties": {
-					"location": {
-						"type": "AzureBlobFSLocation",
-						"fileName": {
-							"value": "@dataset().pSinkFileName",
-							"type": "Expression"
-						},
-						"folderPath": "sink",
-						"fileSystem": "test"
-					},
-					"columnDelimiter": ",",
-					"escapeChar": "\\",
-					"firstRowAsHeader": true,
-					"quoteChar": "\""
-				},
-				"schema": [
-					{
-						"name": "ORDER_ID",
-						"type": "String"
-					},
-					{
-						"name": "ORDER_DATETIME",
-						"type": "String"
-					},
-					{
-						"name": "CUSTOMER_ID",
-						"type": "String"
-					},
-					{
-						"name": "ORDER_STATUS",
-						"type": "String"
-					},
-					{
-						"name": "STORE_ID",
-						"type": "String"
-					}
-				]
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/ls_dl_orders')]"
 			]
 		}
 	]
